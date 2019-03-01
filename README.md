@@ -28,15 +28,16 @@ endmodule
 The C code looks like this
 
 ```c
-#include
+#include <Python.h>
 #include "vpi_user.h"
-#include "pythonEmbedded.h"
  
+extern int sv_write();
+
 static PyObject * c_write(PyObject *self, PyObject *args) {
   int address,data;
   if(!PyArg_ParseTuple(args, "ii", &data, &address))
     return NULL;
-  sv_write(address,data);
+  (void)sv_write(address,data);
   return Py_BuildValue("");
 }
  

@@ -6,7 +6,8 @@ module top;
    // Exported SV task.  Can be called by C,SV or Python using c_write
    task sv_write(input int data,address);
       begin
-	 $display("sv_write(data = %d, address = %d)",data,address);
+	 $display("%t sv_write(data = %d, address = %d)",$time,data,address);
+          #100ns;
       end
    endtask
    

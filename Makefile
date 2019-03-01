@@ -1,27 +1,26 @@
-#These 2 lines were necessary on my debian derivative, to find glibc
-INCLIBC  = -I/usr/include/i386-linux-gnu
-export LIBRARY_PATH := /usr/lib/i386-linux-gnu
+CDS_INST_DIR := $(shell xmroot)
+PYTHON_ROOT  = $(HOME)/venv/python
+CC = gcc
+INCLUDE  = -I$(CDS_INST_DIR)/tools/include
+INCLUDE  += -I$(PYTHON_ROOT)/include/python2.7
+OPT      = -Wall -fpic -shared
+CFLAGS   = $(OPT) $(INCLUDE)
+LIBS     = -lc -lssl -lpthread -lm -ldl -lutil
+LIBS     += -L$(PYTHON_ROOT)/lib -lpython2.7
 
+VSRCS = pythonEmbedded.sv
 
+sim:: xcelium.d libdpi.so
+	xmsim -messages worklib.top
 
-INCLUDE  = $(INCLIBC) -I/usr/include/python2.7 -I$(MTI_HOME)/include 
-CFLAGS   = -gstabs -Wall -fpic -shared
-COMPILER = $(MTI_GCC)/bin/gcc
-LIBS     = -lc -lssl -lpthread -lm -ldl -lutil -lpython2.7
+xcelium.d: $(VSRCS)
+	xmvlog -messages -sv $(VSRCS)
+	xmelab -messages -access +RWC worklib.top
+	touch $@
 
-sim:	pythonEmbedded.h pythonEmbedded.so
-	vsim top -c -sv_lib pythonEmbedded -do "run -all; quit -f"
+libdpi.so: pythonEmbedded.c
+	$(CC) $(CFLAGS) -o $@ $^ $(LIBS)
 
-pythonEmbedded.h: pythonEmbedded.sv
-	vlib work
-	vlog -sv -dpiheader pythonEmbedded.h pythonEmbedded.sv
-
-pythonEmbedded.sv:
-
-pythonEmbedded.so: pythonEmbedded.c
-	$(COMPILER) $< $(CFLAGS) $(INCLUDE) $(LIBS) -o $@
-
-clean:
-	rm -f pythonEmbedded.h pythonEmbedded.so
-	rm -f transcript *.wlf 
-	rm -rf work
+clean::
+	$(RM) libdpi.so
+	$(RM) -r xcelium.d

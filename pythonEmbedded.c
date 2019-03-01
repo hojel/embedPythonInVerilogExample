@@ -1,12 +1,13 @@
 #include <Python.h>
 #include "vpi_user.h"
-#include "pythonEmbedded.h"
+
+extern int sv_write();
 
 static PyObject * c_write(PyObject *self, PyObject *args) {
   int address,data;
   if(!PyArg_ParseTuple(args, "ii", &data, &address))
     return NULL;
-  sv_write(address,data);
+  (void)sv_write(address,data);
   return Py_BuildValue("");  
 }
 
@@ -15,8 +16,7 @@ static PyMethodDef EmbMethods[] = {
   {NULL, NULL, 0, NULL}
 };
 
-DPI_DLLESPEC
-int startPython(){
+int startPython() {
     Py_Initialize();
     Py_InitModule("emb", EmbMethods);
     PyRun_SimpleString("import emb\n"
@@ -24,5 +24,3 @@ int startPython(){
     Py_Finalize();
     return 0;
 }
-
-
