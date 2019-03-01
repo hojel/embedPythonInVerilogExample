@@ -46,7 +46,6 @@ static PyMethodDef EmbMethods[] = {
   {NULL, NULL, 0, NULL}
 };
  
-DPI_DLLESPEC
 int startPython(){
     Py_Initialize();
     Py_InitModule("emb", EmbMethods);
