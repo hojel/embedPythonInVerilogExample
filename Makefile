@@ -8,9 +8,14 @@ CFLAGS   = $(OPT) $(INCLUDE)
 LIBS     = -lc -lssl -lpthread -lm -ldl -lutil
 LIBS     += -L$(PYTHON_ROOT)/lib -lpython2.7
 
+SHLIB = libdpi.so
+CSRCS = pythonEmbedded.c
 VSRCS = pythonEmbedded.sv
 
-sim:: xcelium.d libdpi.so
+run:: $(SHLIB)
+	xrun -sv $(VSRCS) -sv_lib $(SHLIB)
+
+sim:: xcelium.d $(SHLIB)
 	xmsim -messages worklib.top
 
 xcelium.d: $(VSRCS)
@@ -18,9 +23,10 @@ xcelium.d: $(VSRCS)
 	xmelab -messages -access +RWC worklib.top
 	touch $@
 
-libdpi.so: pythonEmbedded.c
+$(SHLIB): $(CSRCS)
 	$(CC) $(CFLAGS) -o $@ $^ $(LIBS)
 
 clean::
-	$(RM) libdpi.so
+	$(RM) $(SHLIB)
 	$(RM) -r xcelium.d
+	$(RM) xm*.log
